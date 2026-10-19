@@ -54,6 +54,42 @@
 
 ### 2.2 생성형 AI 활용
 
+#### [시스템 아키텍처]
+
+```mermaid
+flowchart TB
+    subgraph CL["Client · Next.js 반응형 웹"]
+        U1["대화형 챗봇"]
+        U2["추천 카드 ·<br/>포트폴리오 리포트"]
+        U3["자금 시뮬레이터"]
+        U4["탈락 캡처 업로드"]
+    end
+    subgraph BE["Backend · FastAPI"]
+        API["REST · Streaming API"]
+        ORC["AI 오케스트레이터<br/>LangChain · LlamaIndex"]
+    end
+    subgraph AG["AI 에이전트 계층"]
+        A1["Housing-Match<br/>자격 판별 · Top-N 추천"]
+        A2["Strategy-Optimizer<br/>당첨 가능성 · 분산 전략"]
+        A3["Finance-Check<br/>자금 현실성 진단"]
+        A4["Fail-Recovery<br/>탈락 사유 판독 · 소명"]
+    end
+    subgraph INF["모델 · 데이터 계층"]
+        VDB[("Vector DB + 임베딩<br/>ChromaDB · Qdrant<br/>공고 조항 청크")]
+        LLM["LLM<br/>공고 해석 · 추론 · 리포트 생성"]
+        SDB[("정형 통계 DB<br/>경쟁률 · 커트라인<br/>대출 기준표")]
+        VIS["Vision LLM<br/>캡처 이미지 판독"]
+    end
+    U1 & U2 & U3 & U4 <--> API
+    API <--> ORC
+    ORC --> A1 & A2 & A3 & A4
+    A1 --> VDB
+    A1 & A2 & A3 & A4 --> LLM
+    A2 & A3 --> SDB
+    A4 --> VIS
+    A4 --> VDB
+```
+
 #### [적용 모델·API·도구]
 - **최신 고성능 파운데이션 & 멀티모달 LLM**:
   - **Claude 3.7 Sonnet / GPT-4o**: 100페이지에 달하는 비정형 공고문 RAG 해석, 자격 조건 심층 추론, 복합 탈락 사유 비전 판독 및 정밀 소명 로직 생성
@@ -66,6 +102,57 @@
   - **FastAPI (Python) & Next.js**: 실시간 AI 추론 및 반응형 웹 서비스 인터페이스
 
 #### [각 기능에서 AI가 수행할 역할]
+
+```mermaid
+flowchart LR
+    subgraph IN["① 수집 데이터"]
+        D1["서울시·SH·LH<br/>공고문 PDF"]
+        D2["과거 단지별<br/>경쟁률·커트라인"]
+        D3["버팀목 대출<br/>금리·한도 기준"]
+    end
+    subgraph PRE["② 전처리 · 구조화"]
+        P1["PDF 파싱 · 표 추출<br/>조항 단위 청킹"]
+        P2["메타데이터 라벨링<br/>소득·자산·가점·지역"]
+        P3["통계 정제 · 정규화"]
+    end
+    subgraph KB["③ 지식베이스"]
+        K1[("공고 조항<br/>Vector DB")]
+        K2[("경쟁률·대출 기준<br/>통계 DB")]
+    end
+    subgraph USR["④ 사용자 입력"]
+        Q1["개인 조건 ·<br/>꼬리질문"]
+        Q2["탈락 화면 캡처"]
+    end
+    subgraph AI["⑤ AI 에이전트"]
+        A1["Housing-Match<br/>자격 판별 · Top-N"]
+        A2["Strategy-Optimizer<br/>당첨 가능성 추정"]
+        A3["Finance-Check<br/>필요 현금 산출"]
+        A4["Fail-Recovery<br/>사유 판독 · 소명 설계"]
+    end
+    subgraph GD["⑥ 신뢰성 검증"]
+        G1["근거 조항 · 공고 URL 인용<br/>최종 확인 기관 안내"]
+    end
+    subgraph OUT["⑦ 산출물"]
+        O1["1~3순위 추천"]
+        O2["분산 포트폴리오"]
+        O3["자금 진단 결과"]
+        O4["소명 To-Do"]
+    end
+    D1 --> P1 --> P2 --> K1
+    D2 --> P3
+    D3 --> P3
+    P3 --> K2
+    Q1 --> A1
+    Q1 --> A3
+    Q2 --> A4
+    K1 --> A1
+    K1 --> A4
+    K2 --> A2
+    K2 --> A3
+    A1 --> A2
+    A1 & A2 & A3 & A4 --> G1
+    G1 --> O1 & O2 & O3 & O4
+```
 1. **Housing-Match Agent (맞춤 공고 및 다순위 추천)**:
    - **역할**: 수십 쪽에 달하는 복잡한 공고문 조항(소득 70%·100% 기준, 지역 가점표)을 벡터화하여 인덱싱하고, 청년 개인 조건과 정밀 대조하여 지원 자격 충족 여부를 정교하게 판별.
    - **추천**: 단순 나열이 아닌, 개인의 선호(통근 시간, 보증금 한도)와 자격 가점을 결합하여 1순위, 2순위, 3순위 맞춤 주택 리스트 도출.
@@ -130,6 +217,37 @@
    - 어떤 공공 플랫폼이나 민간 부동산 앱도 다루지 않던 '서류 탈락 후 보완 단계'를 정조준하여, 단 1회의 보완 기회에 무엇을 제출해야 하는지 비정형 화면 캡처로부터 역추적해 주는 국내 유일의 사후 케어 에이전트입니다.
 
 ### 2.5 서비스 흐름도
+
+#### [전주기 서비스 흐름도]
+
+```mermaid
+flowchart LR
+    subgraph S1["1단계 · 전략 수립"]
+        direction TB
+        A(["청년 사용자"]) --> B["조건 입력 & 챗봇 상담<br/>소득·자산·직장 위치·가용 현금"]
+        B --> C["자격 요건 대조<br/>Notice RAG"]
+        C --> D["1~3순위 맞춤 주택 추천<br/>Housing-Match"]
+        D --> E["도전형 + 안정형<br/>분산 지원 포트폴리오<br/>Strategy-Optimizer"]
+    end
+    subgraph S2["2단계 · 자금 검증"]
+        direction TB
+        F["버팀목 대출 한도 &<br/>필요 현금 시뮬레이션<br/>Finance-Check"] --> G{"입주 자금<br/>조달 가능?"}
+        G -- "가능" --> H["공식 접수<br/>SH·LH 청약 시스템"]
+        G -- "부족" --> R["자금 여력에 맞는<br/>안정형 단지로 재조정"]
+        R --> H
+    end
+    subgraph S3["3단계 · 결과 대응"]
+        direction TB
+        I{"서류 심사 결과"}
+        I -- "적격·당첨" --> J["입주 절차 &<br/>대출 실행 안내"]
+        I -- "부적격 통보" --> K["마이페이지 탈락 화면<br/>캡처 업로드"]
+        K --> L["탈락 사유 판독 &<br/>건보 유형별 분석<br/>Fail-Recovery"]
+        L --> M["1:1 맞춤 소명<br/>To-Do 체크리스트"]
+        M --> N["보완 기한 내<br/>소명 서류 제출"]
+        N -- "재심사" --> I
+    end
+    S1 --> S2 --> S3
+```
 
 #### [전주기 서비스 흐름 요약표]
 
