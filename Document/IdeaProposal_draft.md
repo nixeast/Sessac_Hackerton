@@ -35,10 +35,19 @@ flowchart LR
     end
     R1 --> R2 --> R3 --> G(["실질 입주 성공<br/>공실 감소 · 정책 도달률 제고"])
 
-    classDef pain fill:#fde8e8,stroke:#c0392b,color:#5c1a1a
-    classDef fix fill:#e6f4ea,stroke:#2e7d32,color:#1b3d20
+    classDef pain fill:#FFEBEE,stroke:#E53935,stroke-width:2px,color:#B71C1C
+    classDef fix fill:#E8F5E9,stroke:#43A047,stroke-width:2px,color:#1B5E20
+    classDef goal fill:#2E7D32,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF,font-weight:bold
     class P1,P2,P3 pain
-    class S1,S2,S3,G fix
+    class S1,S2,S3 fix
+    class G goal
+
+    style R1 fill:#E3F2FD,stroke:#1E88E5,stroke-width:2px,color:#0D47A1
+    style R2 fill:#EDE7F6,stroke:#5E35B1,stroke-width:2px,color:#311B92
+    style R3 fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px,color:#E65100
+
+    linkStyle 0,1,2 stroke:#43A047,stroke-width:2px,color:#2E7D32
+    linkStyle 3,4,5 stroke:#546E7A,stroke-width:3px
 ```
 
 ---
@@ -64,8 +73,16 @@ flowchart LR
     S <--> AG["AI 에이전트 4종<br/>추천 · 전략 · 자금 · 소명"]
     AG <--> M[("생성형 AI 모델 · 지식베이스<br/>LLM · Vision · Vector DB")]
 
-    classDef ai fill:#e8f0fe,stroke:#4a6fa5,color:#1a2b49
-    class AG,M ai
+    classDef user fill:#E3F2FD,stroke:#1E88E5,stroke-width:2px,color:#0D47A1
+    classDef server fill:#ECEFF1,stroke:#546E7A,stroke-width:2px,color:#263238
+    classDef agent fill:#EDE7F6,stroke:#5E35B1,stroke-width:2px,color:#311B92
+    classDef model fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px,color:#E65100
+    class U user
+    class S server
+    class AG agent
+    class M model
+
+    linkStyle default stroke:#546E7A,stroke-width:2px
 ```
 
 #### [적용 모델·API·도구]
@@ -118,10 +135,21 @@ flowchart LR
     D -- "부적격" --> F["탈락 사유 판독 ·<br/>소명 To-Do<br/>Fail-Recovery"]
     F -. "보완 제출 · 재심사" .-> D
 
-    classDef ai fill:#e8f0fe,stroke:#4a6fa5,color:#1a2b49
-    classDef out fill:#e6f4ea,stroke:#2e7d32,color:#1b3d20
-    class B,C,F ai
-    class E out
+    classDef start fill:#E3F2FD,stroke:#1E88E5,stroke-width:2px,color:#0D47A1
+    classDef ai fill:#EDE7F6,stroke:#5E35B1,stroke-width:2px,color:#311B92
+    classDef decision fill:#FFF8E1,stroke:#FFA000,stroke-width:2px,color:#E65100
+    classDef recover fill:#FFEBEE,stroke:#E53935,stroke-width:2px,color:#B71C1C
+    classDef goal fill:#2E7D32,stroke:#1B5E20,stroke-width:2px,color:#FFFFFF,font-weight:bold
+    class A start
+    class B,C ai
+    class D decision
+    class F recover
+    class E goal
+
+    linkStyle 0,1,2 stroke:#546E7A,stroke-width:2px
+    linkStyle 3 stroke:#43A047,stroke-width:2px,color:#2E7D32
+    linkStyle 4 stroke:#E53935,stroke-width:2px,color:#C62828
+    linkStyle 5 stroke:#FB8C00,stroke-width:2px,color:#E65100
 ```
 
 ---
